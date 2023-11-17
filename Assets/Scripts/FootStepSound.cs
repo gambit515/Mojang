@@ -13,9 +13,8 @@ public class FootstepSound : MonoBehaviour
     {
         // Инициализация словаря и пример добавления звуков
         footstepSounds = new Dictionary<string, AudioClip>();
-        footstepSounds.Add("default", null); // Звук ходьбы по умолчанию (может быть null)
+        footstepSounds.Add("default", Resources.Load<AudioClip>("Audio/stone1")); // Звук ходьбы по умолчанию (может быть null)
         footstepSounds.Add("PinkWoolMaterial (Instance)", Resources.Load<AudioClip>("Audio/Cloth_dig1"));
-        footstepSounds.Add("concrete", Resources.Load<AudioClip>("Footstep_Concrete"));
     }
 
     void Update()
@@ -50,19 +49,12 @@ public class FootstepSound : MonoBehaviour
         if (Physics.Raycast(ray, out hit, raycastDistance))
         {
             // Получаем материал объекта, с которым столкнулся луч
-            
-            if(hit.collider.GetComponent<Renderer>().material.name == "Default-Material (Instance)")
-            {
-                currentSurface = "default";
-            }
-            else
-            {
+            if (footstepSounds.ContainsKey(hit.collider.GetComponent<Renderer>().material.name))
                 currentSurface = hit.collider.GetComponent<Renderer>().material.name;
-            }
-
+            else currentSurface = "default";
 
             // Теперь вы можете использовать currentMaterial для определения текущей поверхности
-            Debug.Log("Current Surface: " + currentSurface);
+            //Debug.Log("Current Surface: " + currentSurface);
         }
     }
 }

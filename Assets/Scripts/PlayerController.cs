@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask groundLayer;
     [SerializeField] Joystick joystick;
     [SerializeField] private float touchSensivity;
+    [SerializeField] private float cameraHeight = 1f;
 
     private float sensorXaxis;
     private float sensorYaxis;
@@ -33,7 +34,15 @@ public class PlayerController : MonoBehaviour
         RotatePlayer();
         RotateCamera();
         PrepearingToJump();
+        CameraUpdate();
+        
         //Debug.Log(Input.GetAxis("Horizontal")+"   "+ Input.GetAxis("Vertical"));
+    }
+    private void CameraUpdate()
+    {
+        Vector3 cameraVector = transform.position;
+        cameraVector.y = transform.position.y + cameraHeight;
+        playerCamera.transform.position = cameraVector;
     }
     //Откат прыжка и при нажатии на пробел вызов прыжка
     void PrepearingToJump()
@@ -64,7 +73,6 @@ public class PlayerController : MonoBehaviour
             if (!IsObstacleInFront(moveLocalDirection))
             {
                 transform.Translate(moveDirection * movementSpeed * Time.deltaTime);
-                playerCamera.transform.position = transform.position;
             }
     }
     //Проверка на отсутствии объекта в сторону перемещения
