@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
         playerRigidbody = GetComponent<Rigidbody>();
         playerCamera = GetComponentInChildren<Camera>();
         //Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
+        //эCursor.visible = false;
     }
 
     void Update()
@@ -32,13 +32,20 @@ public class PlayerController : MonoBehaviour
         MovePlayer();
         RotatePlayer();
         RotateCamera();
-        Jump();
-        Debug.Log(Input.GetAxis("Horizontal")+"   "+ Input.GetAxis("Vertical"));
+        PrepearingToJump();
+        //Debug.Log(Input.GetAxis("Horizontal")+"   "+ Input.GetAxis("Vertical"));
     }
-    void Jump()
+    //Откат прыжка и при нажатии на пробел вызов прыжка
+    void PrepearingToJump()
     {
         isGrounded = Physics.Raycast(transform.position, Vector3.down, RaycastRange, groundLayer);
-        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space))
+            Jump();
+    }
+    //Функция которая вызывает прыжок
+    public void Jump()
+    {
+        if (isGrounded)
             playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
@@ -51,11 +58,32 @@ public class PlayerController : MonoBehaviour
         float vertical = Input.GetAxis("Vertical") != 0 ? Input.GetAxis("Vertical"): joystick.Vertical;
 
         Vector3 moveDirection = new(horizontal, 0, vertical);
-
-        transform.Translate(moveDirection * movementSpeed * Time.deltaTime);
-        playerCamera.transform.position = transform.position;
+        Vector3 moveLocalDirection = transform.TransformDirection(moveDirection);
+        if (moveDirection != new Vector3(0,0,0))
+            
+            if (!IsObstacleInFront(moveLocalDirection))
+            {
+                transform.Translate(moveDirection * movementSpeed * Time.deltaTime);
+                playerCamera.transform.position = transform.position;
+            }
     }
+    //Проверка на отсутствии объекта в сторону перемещения
+    bool IsObstacleInFront(Vector3 moveDirection)
+    {
+        // Рассчитываем луч, направленный вперед от положения персонажа
+         Ray ray = new Ray(transform.position, moveDirection);
+        float maxDistance = 0.75f; // Максимальная дистанция луча
+        Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.blue);
+        // Проверяем, есть ли коллизии на пути луча
+        if (Physics.Raycast(ray, maxDistance))
+        {
+            // Если есть, возвращаем true, что указывает на препятствие
+            return true;
+        }
 
+        // В противном случае, возвращаем false
+        return false;
+    }
     void RotatePlayer()
     {
         float mouseX = Input.GetAxis("Mouse X") != 0 ? Input.GetAxis("Mouse X") : sensorXaxis;
@@ -88,14 +116,23 @@ public class PlayerController : MonoBehaviour
                 break;
         }
     }
+    //Обработка касаний для вразения камеры/вращения объекта
     void HandleTouches()
     {
         sensorXaxis = 0;
         sensorYaxis = 0;
         if (Input.touchCount > 0)
         {
-            Touch touch = Input.GetTouch(0);
-
+            foreach(Touch touch in Input.touches)
+            {
+                TouchSwapping(touch);
+            }
+        }
+    }
+    //Обработка каждого отдельного касания
+    void TouchSwapping(Touch touch)
+    {
+        if (touch.position.x > Screen.width / 2)
             switch (touch.phase)
             {
                 case TouchPhase.Moved:
@@ -108,7 +145,6 @@ public class PlayerController : MonoBehaviour
                     sensorYaxis = Input.GetAxis("Vertical") + verticalDelta;
                     break;
             }
-        }
     }
 
 }
