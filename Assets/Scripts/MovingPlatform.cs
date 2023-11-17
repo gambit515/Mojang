@@ -8,23 +8,21 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private Vector3 StartVector;
     [SerializeField] private Vector3 FinishVector;
     private bool isFinish = false;
-    private Vector3 speed = new Vector3();
+    private Vector3 speed = new();
     [SerializeField] private float duration;
-    private List<GameObject> onPlatform = new List<GameObject> { };
+    private List<GameObject> onPlatform = new() { };
 
 
     private bool IsFirstXBigger;
     private bool IsFirstYBigger;
     private bool IsFirstZBigger;
 
-    private float elapsedTime = 0;
-
     // Update is called once per frame
     private void Start()
     {
-        IsFirstXBigger = StartVector.x > FinishVector.x ? true : false;
-        IsFirstYBigger = StartVector.y > FinishVector.y ? true : false;
-        IsFirstZBigger = StartVector.z > FinishVector.z ? true : false;
+        IsFirstXBigger = StartVector.x > FinishVector.x;
+        IsFirstYBigger = StartVector.y > FinishVector.y;
+        IsFirstZBigger = StartVector.z > FinishVector.z;
 
 
         /*speed.x = (Math.Abs(StartVector.x) - Math.Abs(FinishVector.x)) / duration;
