@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class FootstepSound : MonoBehaviour
 {
-    public Dictionary<string, AudioClip> footstepSounds; // Словарь для хранения звуков ходьбы по типам покрытия
-    public string currentSurface = "default"; // Текущее покрытие
+    public Dictionary<string, AudioClip> footstepSounds;    // Словарь для хранения звуков ходьбы по типам покрытия
+    public string currentSurface = "default";               // Текущее покрытие
     [SerializeField] private float footstepInterval = 0.5f; // Интервал между звуками ходьбы
     [SerializeField] private float raycastDistance = 1.0f;
     private float lastFootstepTime;
