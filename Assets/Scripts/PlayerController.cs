@@ -5,27 +5,52 @@ using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
+    //Скорость передвижения игрока
     [SerializeField] private float movementSpeed = 5.0f;
+    //Скорость поворота камеры игрока
     [SerializeField] private float rotationSpeed = 2.0f;
+    [SerializeField] private float colliderCheckerRay;
+    //Дальность луча, который проверяет, что игрок на щемле
     [SerializeField] private float jumpRaycastRange;
+    //Сила прыжка игрока
     [SerializeField] private float jumpForce = 10f;
+    //Слой, который считается землей
     [SerializeField] LayerMask groundLayer;
+    //Джойстик из пакета EasyJoystick, планируется перенос в отдельную надстройку
     [SerializeField] EasyJoystick.Joystick joystick;
+    //Чувствительносноть передвижения камеры сенсорным экраном
     [SerializeField] private float touchSensivity;
+    //Чувствительность передвижения камеры с помощью мыши
     [SerializeField] private float mouseSensivity;
+    //Высота камеры над основным телом объекта
     [SerializeField] private float cameraHeight = 1f;
+    [SerializeField] private GameObject[] meshPoints;
 
+    //Сенсорные значения передвижения
     private float sensorXaxis;
     private float sensorYaxis;
+
+    
     private Camera playerCamera;
     private Rigidbody playerRigidbody;
+
+    //Переменная для хранения поворота камеры по x
     private float cameraRotationX = 0f;
+
+    //Флаг, что объект находится на земле
     private bool isGrounded;
+
+    //private Vector3[] meshVertices;
 
     void Start()
     {
+
+        //Получение компонентов с объекта
+        //meshVertices = GetVertices(GetComponent<MeshCollider>());
         playerRigidbody = GetComponent<Rigidbody>();
         playerCamera = GetComponentInChildren<Camera>();
+
+        //Настройки курсора
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -55,13 +80,15 @@ public class PlayerController : MonoBehaviour
     //Откат прыжка и при нажатии на пробел вызов прыжка
     void IsOnGround()
     {
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, jumpRaycastRange, groundLayer);
+        Vector3 floor = transform.position;
+        floor.y = floor.y - cameraHeight;
+        isGrounded = Physics.Raycast(floor, Vector3.down, jumpRaycastRange, groundLayer);
        
     }
     //Функция которая вызывает прыжок
     public void WannaJump()
     {
-        
+        Debug.Log("transform"+transform.position);
         Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
         cameraPosition.y += cameraHeight;
         if (isGrounded && !IsObstacle(cameraPosition, Vector3.up * jumpForce))
@@ -82,7 +109,7 @@ public class PlayerController : MonoBehaviour
             Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
             cameraPosition.y += cameraHeight;
             // Проверка отсутсвия блоков перед двумя точками, перед камерой и перед серединой тела
-            if (!IsObstacle(transform.position,moveLocalDirection) && !IsObstacle(cameraPosition, moveLocalDirection))
+            if (!IsObstacle(meshPoints, moveLocalDirection) && !IsObstacle(cameraPosition, moveLocalDirection))
             {
                 transform.Translate(moveDirection * movementSpeed * Time.deltaTime);
             }
@@ -94,19 +121,38 @@ public class PlayerController : MonoBehaviour
     {
         // Рассчитываем луч, направленный вперед от положения персонажа
          Ray ray = new Ray(orgin, moveDirection);
-        float maxDistance = 0.75f; // Максимальная дистанция луча
+        float maxDistance = colliderCheckerRay; // Максимальная дистанция луча
 
         //Отображение вектора для отладки
         Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.blue);
 
         // Проверяем, есть ли коллизии на пути луча
-        if (Physics.Raycast(ray, maxDistance))
+        RaycastHit hit;
+        if (Physics.Raycast(ray,out hit, maxDistance))
         {
-            // Если есть, возвращаем true, что указывает на препятствие
-            return true;
+            if (hit.collider.gameObject.tag != "Player")
+                // Если есть, возвращаем true, что указывает на препятствие
+                return true;
         }
 
         // В противном случае, возвращаем false
+        return false;
+    }
+    bool IsObstacle(GameObject[] origins, Vector3 moveDirection)
+    {
+        foreach(GameObject origin in origins)
+        {
+            Vector3 origin2 = origin.transform.position;
+            Ray ray = new Ray(origin2, moveDirection);
+            float maxDistance = colliderCheckerRay;
+            Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.blue);
+            RaycastHit hit;
+            if (Physics.Raycast(ray,out hit,maxDistance))
+            {
+                if(hit.collider.gameObject.tag != "Player")
+                    return true;
+            }
+        }
         return false;
     }
     void RotatePlayer()
@@ -160,11 +206,11 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            joystick.OnPointerUp(new PointerEventData(EventSystem.current));
-            joystick.gameObject.SetActive(false);
+            joystick.TouchUp();
         }
             
     }
+    
     //Обработка каждого отдельного касания
     void TouchSwapping(Touch touch)
     {
@@ -183,16 +229,17 @@ public class PlayerController : MonoBehaviour
             }
         else
         {
-            if (!joystick.gameObject.activeSelf)
-            {
-                joystick.gameObject.SetActive(true);
-                joystick.transform.position = new Vector3(touch.position.x, touch.position.y);
-                
-            }
-            PointerEventData eventData = new PointerEventData(EventSystem.current);
-            eventData.position = touch.position;
-            joystick.OnPointerDown(eventData);
+            joystick.TouchDown(touch);
         }
     }
+    //private Vector3[] GetVertices(MeshCollider meshCollider)
+    //{
+    //    if (meshCollider != null)
+    //    {
+    //        Mesh mesh = meshCollider.sharedMesh;
+    //        return (mesh.vertices);
+    //    }
+    //    return null;
+    //}
 
 }

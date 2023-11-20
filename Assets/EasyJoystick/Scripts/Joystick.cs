@@ -39,7 +39,7 @@ namespace EasyJoystick {
 
       private PointerEventData pointerEventData ;
       private Camera cam ;
-
+      
 
 
       private void OnEnable () {
@@ -104,7 +104,29 @@ namespace EasyJoystick {
 
          return normalizedPoint.y ;
       }
+        ///
+        ///Авторский код от деда
+        ///
+        public void TouchUp()
+        {
+            OnPointerUp(new PointerEventData(EventSystem.current));
+            container.gameObject.SetActive(false);
+            handle.gameObject.SetActive(false);
+        }
+        public void TouchDown(Touch touch)
+        {
+            if (!container.gameObject.activeSelf)
+            {
+                container.gameObject.SetActive(true);
+                handle.gameObject.SetActive(true);
+                gameObject.transform.position = new Vector3(touch.position.x, touch.position.y);
 
-   }
+            }
+            PointerEventData eventData = new PointerEventData(EventSystem.current);
+            eventData.position = touch.position;
+            OnPointerDown(eventData);
+        }
+
+    }
 
 }
