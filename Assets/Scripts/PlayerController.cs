@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using EasyJoystick;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -25,6 +26,9 @@ public class PlayerController : MonoBehaviour
     //Высота камеры над основным телом объекта
     [SerializeField] private float cameraHeight = 1f;
     [SerializeField] private GameObject[] meshPoints;
+    [SerializeField] private RectTransform rightPieceOfScreen;
+
+
 
     //Сенсорные значения передвижения
     private float sensorXaxis;
@@ -38,7 +42,7 @@ public class PlayerController : MonoBehaviour
     private float cameraRotationX = 0f;
 
     //Флаг, что объект находится на земле
-    private bool isGrounded;
+    public bool isGrounded;
 
     //private Vector3[] meshVertices;
 
@@ -88,7 +92,7 @@ public class PlayerController : MonoBehaviour
     //Функция которая вызывает прыжок
     public void WannaJump()
     {
-        Debug.Log("transform"+transform.position);
+        //Debug.Log("transform"+transform.position);
         Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
         cameraPosition.y += cameraHeight;
         if (isGrounded && !IsObstacle(cameraPosition, Vector3.up * jumpForce))
@@ -97,8 +101,9 @@ public class PlayerController : MonoBehaviour
 
     void MovePlayer()
     {
-        float horizontal = Input.GetAxis("Horizontal") != 0 ? Input.GetAxis("Horizontal"): joystick.Horizontal();
-        float vertical = Input.GetAxis("Vertical") != 0 ? Input.GetAxis("Vertical"): joystick.Vertical();
+        
+        float horizontal = !SDKLANG.IsMobileDevice ? Input.GetAxis("Horizontal"): joystick.Horizontal();
+        float vertical = !SDKLANG.IsMobileDevice ? Input.GetAxis("Vertical"): joystick.Vertical();
 
         Vector3 moveDirection = new(horizontal, 0, vertical);
         
@@ -157,7 +162,7 @@ public class PlayerController : MonoBehaviour
     }
     void RotatePlayer()
     {
-        float mouseX = Input.GetAxis("Mouse X") != 0 ? Input.GetAxis("Mouse X")*mouseSensivity : sensorXaxis;
+        float mouseX = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse X")*mouseSensivity : -sensorXaxis;
         if (!mouseX.Equals(new Vector3(0, 0, 0)))
         {
             Vector3 playerRotation = new(0, mouseX * rotationSpeed *Time.deltaTime, 0);
@@ -169,7 +174,7 @@ public class PlayerController : MonoBehaviour
 
     void RotateCamera()
     {
-        float mouseY = Input.GetAxis("Mouse Y") != 0 ? Input.GetAxis("Mouse Y")*mouseSensivity : sensorYaxis;
+        float mouseY = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse Y")*mouseSensivity : -sensorYaxis;
         //float mouseY = Input.GetAxis("Mouse Y");
         if(!mouseY.Equals(new Vector3(0, 0, 0)))
         {
@@ -214,7 +219,8 @@ public class PlayerController : MonoBehaviour
     //Обработка каждого отдельного касания
     void TouchSwapping(Touch touch)
     {
-        if (touch.position.x > Screen.width / 2)
+        //if (touch.position.x > Screen.width / 2)
+        if (RectTransformUtility.RectangleContainsScreenPoint(rightPieceOfScreen, touch.position))
             switch (touch.phase)
             {
                 case TouchPhase.Moved:
@@ -232,14 +238,5 @@ public class PlayerController : MonoBehaviour
             joystick.TouchDown(touch);
         }
     }
-    //private Vector3[] GetVertices(MeshCollider meshCollider)
-    //{
-    //    if (meshCollider != null)
-    //    {
-    //        Mesh mesh = meshCollider.sharedMesh;
-    //        return (mesh.vertices);
-    //    }
-    //    return null;
-    //}
 
 }

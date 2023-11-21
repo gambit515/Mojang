@@ -8,9 +8,11 @@ public class FootstepSound : MonoBehaviour
     [SerializeField] private float footstepInterval = 0.5f; // Интервал между звуками ходьбы
     [SerializeField] private float raycastDistance = 1.0f;
     private float lastFootstepTime;
+    private PlayerController playerController;
 
     void Start()
     {
+        playerController= GetComponent<PlayerController>();
         // Инициализация словаря и пример добавления звуков
         footstepSounds = new Dictionary<string, AudioClip>();
         footstepSounds.Add("default", Resources.Load<AudioClip>("Audio/stone1")); // Звук ходьбы по умолчанию (может быть null)
@@ -21,7 +23,7 @@ public class FootstepSound : MonoBehaviour
     {
         CheckSurface();
         
-        if (Time.time - lastFootstepTime > footstepInterval && (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0))
+        if (Time.time - lastFootstepTime > footstepInterval && (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0) && playerController.isGrounded)
         {
             PlayFootstepSound();
             lastFootstepTime = Time.time;

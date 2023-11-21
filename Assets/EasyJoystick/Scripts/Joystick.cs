@@ -1,6 +1,6 @@
-﻿using UnityEngine ;
-using UnityEngine.Events ;
-using UnityEngine.EventSystems ;
+﻿using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 ///  <summary>
 ///  EasyJoystick
@@ -12,98 +12,109 @@ using UnityEngine.EventSystems ;
 ///
 ///  </summary>
 
-namespace EasyJoystick {
+namespace EasyJoystick
+{
 
-   public class Joystick : MonoBehaviour,IPointerDownHandler,IDragHandler,IPointerUpHandler {
+    public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+    {
 
-      private RectTransform container ;
-      private RectTransform handle ;
+        private RectTransform container;
+        private RectTransform handle;
 
-      /// <summary>
-      /// Enable it if you want to use your keyboard's arrow keys as a joystick too.
-      /// </summary>
-      [Tooltip ("enable it if you want to use your keyboard's arrow keys as a joystick too.")]
-      public bool ArrowKeysSimulationEnabled = false ;
+        /// <summary>
+        /// Enable it if you want to use your keyboard's arrow keys as a joystick too.
+        /// </summary>
+        [Tooltip("enable it if you want to use your keyboard's arrow keys as a joystick too.")]
+        public bool ArrowKeysSimulationEnabled = false;
 
-      private Vector2 point ;
-      private Vector2 normalizedPoint ;
+        private Vector2 point;
+        private Vector2 normalizedPoint;
 
-      private float maxLength ;
+        private float maxLength;
 
-      private bool _isTouching = false ;
+        private bool _isTouching = false;
 
-      public bool IsTouching { get { return _isTouching ; } }
+        public bool IsTouching { get { return _isTouching; } }
 
-      public UnityAction OnJoystickDownAction ;
-      public UnityAction OnJoystickUpAction ;
+        public UnityAction OnJoystickDownAction;
+        public UnityAction OnJoystickUpAction;
 
-      private PointerEventData pointerEventData ;
-      private Camera cam ;
-      
+        private PointerEventData pointerEventData;
+        private Camera cam;
 
 
-      private void OnEnable () {
-         OnPointerUp (null) ;
-      }
 
-      private void Awake () {
-         container = transform.GetComponent <RectTransform> () ;
-         handle = container.GetChild (0).GetComponent <RectTransform> () ;
+        private void OnEnable()
+        {
+            OnPointerUp(null);
+        }
 
-         maxLength = (container.sizeDelta.x / 2f) - (handle.sizeDelta.x / 2f) - 5f ;
-      }
+        private void Awake()
+        {
+            container = transform.GetComponent<RectTransform>();
+            handle = container.GetChild(0).GetComponent<RectTransform>();
 
-      public void OnPointerDown (PointerEventData e) {
-         if (OnJoystickDownAction != null)
-            OnJoystickDownAction.Invoke () ;
+            maxLength = (container.sizeDelta.x / 2f) - (handle.sizeDelta.x / 2f) - 5f;
+        }
 
-         _isTouching = true ;
-         cam = e.pressEventCamera ;
-         OnDrag (e) ;
-      }
+        public void OnPointerDown(PointerEventData e)
+        {
+            if (OnJoystickDownAction != null)
+                OnJoystickDownAction.Invoke();
 
-      public void OnDrag (PointerEventData e) {
-         pointerEventData = e ;
-      }
+            _isTouching = true;
+            cam = e.pressEventCamera;
+            OnDrag(e);
+        }
 
-      void Update () {
-         if (_isTouching && RectTransformUtility.ScreenPointToLocalPointInRectangle (container, pointerEventData.position, cam, out point)) {
-            point = Vector2.ClampMagnitude (point, maxLength) ;
-            handle.anchoredPosition = point ;
+        public void OnDrag(PointerEventData e)
+        {
+            pointerEventData = e;
+        }
 
-            float length = Mathf.InverseLerp (0f, maxLength, point.magnitude) ;
-            normalizedPoint = Vector2.ClampMagnitude (point, length) ;
-         }
-      }
+        void Update()
+        {
+            if (_isTouching && RectTransformUtility.ScreenPointToLocalPointInRectangle(container, pointerEventData.position, cam, out point))
+            {
+                point = Vector2.ClampMagnitude(point, maxLength);
+                handle.anchoredPosition = point;
 
-      public void OnPointerUp (PointerEventData e) {
-         if (OnJoystickUpAction != null)
-            OnJoystickUpAction.Invoke () ;
+                float length = Mathf.InverseLerp(0f, maxLength, point.magnitude);
+                normalizedPoint = Vector2.ClampMagnitude(point, length);
+            }
+        }
 
-         _isTouching = false ;
-         normalizedPoint = Vector3.zero ;
-         handle.anchoredPosition = Vector3.zero ;
-      }
+        public void OnPointerUp(PointerEventData e)
+        {
+            if (OnJoystickUpAction != null)
+                OnJoystickUpAction.Invoke();
 
-      /// <summary>
-      /// Returns horizontal movement. clamped between -1 and 1
-      /// </summary>
-      public float Horizontal () {
-         if (ArrowKeysSimulationEnabled)
-            return (normalizedPoint.x != 0) ? normalizedPoint.x : Input.GetAxis ("Horizontal") ;
+            _isTouching = false;
+            normalizedPoint = Vector3.zero;
+            handle.anchoredPosition = Vector3.zero;
+        }
 
-         return normalizedPoint.x ;
-      }
+        /// <summary>
+        /// Returns horizontal movement. clamped between -1 and 1
+        /// </summary>
+        public float Horizontal()
+        {
+            if (ArrowKeysSimulationEnabled)
+                return (normalizedPoint.x != 0) ? normalizedPoint.x : Input.GetAxis("Horizontal");
 
-      /// <summary>
-      /// Returns vertical movement. clamped between -1 and 1
-      /// </summary>
-      public float Vertical () {
-         if (ArrowKeysSimulationEnabled)
-            return (normalizedPoint.y != 0) ? normalizedPoint.y : Input.GetAxis ("Vertical") ;
+            return normalizedPoint.x;
+        }
 
-         return normalizedPoint.y ;
-      }
+        /// <summary>
+        /// Returns vertical movement. clamped between -1 and 1
+        /// </summary>
+        public float Vertical()
+        {
+            if (ArrowKeysSimulationEnabled)
+                return (normalizedPoint.y != 0) ? normalizedPoint.y : Input.GetAxis("Vertical");
+
+            return normalizedPoint.y;
+        }
         ///
         ///Авторский код от деда
         ///
