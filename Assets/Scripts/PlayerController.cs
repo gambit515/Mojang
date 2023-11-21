@@ -114,7 +114,8 @@ public class PlayerController : MonoBehaviour
             Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
             cameraPosition.y += cameraHeight;
             // Проверка отсутсвия блоков перед двумя точками, перед камерой и перед серединой тела
-            if (!IsObstacle(meshPoints, moveLocalDirection) && !IsObstacle(cameraPosition, moveLocalDirection))
+            //if (!IsObstacle(meshPoints, moveLocalDirection) && !IsObstacle(cameraPosition, moveLocalDirection))
+            if (!IsObstacle(meshPoints, moveLocalDirection))
             {
                 transform.Translate(moveDirection * movementSpeed * Time.deltaTime);
             }
