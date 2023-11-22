@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Speed
   - Gold
+  - Coal
   layers:
   - Default
   - TransparentFX

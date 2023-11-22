@@ -12,9 +12,11 @@ GameObject:
   - component: {fileID: 3704661717763620304}
   - component: {fileID: 6132895860418550080}
   - component: {fileID: 2122204505567587935}
+  - component: {fileID: 6919992325743416093}
+  - component: {fileID: 7271069485663866309}
   m_Layer: 0
   m_Name: CoalBLock
-  m_TagString: Untagged
+  m_TagString: Coal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -105,3 +107,38 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &6919992325743416093
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3840673598170923164}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5efc94c448760f8499e760e83cdcb5c4, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7271069485663866309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3840673598170923164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4305c9c83394ee34fa2bf401f70dbc93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  time_delay: 1
+  hitSound: {fileID: 8300000, guid: 55c09c2de144d1d47b01e1c56ecc2dd0, type: 3}

@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class SDKLANG : MonoBehaviour
 {
+    public static bool IsMobileDevice = false;
     public Text _textLanguage;
     public Text Languages;
     public Text deviceText;
@@ -26,7 +27,7 @@ public class SDKLANG : MonoBehaviour
             return _instance;
         }
     }
-    public static bool IsMobileDevice = false;
+    
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);

@@ -163,7 +163,7 @@ public class PlayerController : MonoBehaviour
     }
     void RotatePlayer()
     {
-        float mouseX = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse X")*mouseSensivity : -sensorXaxis;
+        float mouseX = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse X")*mouseSensivity : sensorXaxis;
         if (!mouseX.Equals(new Vector3(0, 0, 0)))
         {
             Vector3 playerRotation = new(0, mouseX * rotationSpeed *Time.deltaTime, 0);
@@ -175,7 +175,7 @@ public class PlayerController : MonoBehaviour
 
     void RotateCamera()
     {
-        float mouseY = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse Y")*mouseSensivity : -sensorYaxis;
+        float mouseY = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse Y")*mouseSensivity : sensorYaxis;
         //float mouseY = Input.GetAxis("Mouse Y");
         if(!mouseY.Equals(new Vector3(0, 0, 0)))
         {
