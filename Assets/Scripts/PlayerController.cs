@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
     //Дальность луча, который проверяет, что игрок на щемле
     [SerializeField] private float jumpRaycastRange;
     //Сила прыжка игрока
-    [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private float jumpHeight = 10f;
+    [SerializeField] private float timeToJumpApex = 0.5f;
     //Слой, который считается землей
     [SerializeField] LayerMask groundLayer;
     //Джойстик из пакета EasyJoystick, планируется перенос в отдельную надстройку
@@ -28,7 +29,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject[] meshPoints;
     [SerializeField] private RectTransform rightPieceOfScreen;
 
+    [SerializeField] private float rangeBColiderCheckers;
 
+    //private float gravity;
+    //private float jumpVelocity;
+    //private Vector3 velocity;
 
     //Сенсорные значения передвижения
     private float sensorXaxis;
@@ -44,10 +49,10 @@ public class PlayerController : MonoBehaviour
     //Флаг, что объект находится на земле
     public bool isGrounded;
 
-    //private Vector3[] meshVertices;
-
     void Start()
     {
+        //gravity = -(jumpHeight/6) / Mathf.Pow(timeToJumpApex, 2);
+        //jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
 
         //Получение компонентов с объекта
         //meshVertices = GetVertices(GetComponent<MeshCollider>());
@@ -61,6 +66,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+
         IsOnGround();
         HandleTouches();
         MovePlayer();
@@ -87,40 +93,103 @@ public class PlayerController : MonoBehaviour
         Vector3 floor = transform.position;
         floor.y = floor.y - cameraHeight;
         isGrounded = Physics.Raycast(floor, Vector3.down, jumpRaycastRange, groundLayer);
+        //if (!isGrounded)
+        //    ApplyGravity();
+        //else
+        //    velocity.y= 0f;
        
     }
+    //private void ApplyGravity()
+    //{
+    //    velocity.y += gravity * Time.deltaTime;
+    //}
     //Функция которая вызывает прыжок
     public void WannaJump()
     {
         //Debug.Log("transform"+transform.position);
         Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
         cameraPosition.y += cameraHeight;
-        if (isGrounded && !IsObstacle(cameraPosition, Vector3.up * jumpForce))
-            playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        if (isGrounded && !IsObstacle(cameraPosition, Vector3.up * jumpHeight))
+        {
+            //playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            //Vector3 jumpVector = new(transform.position.x,transform.position.y+jumpHeight, transform.position.z);
+            Vector3 jumpVector = new(0, jumpHeight,0);
+            playerRigidbody.velocity = jumpVector;
+            Invoke(nameof(StopVelocity), 0.2f);
+            //transform.position = jumpVector;
+            //playerRigidbody.AddForce(jumpVector,ForceMode.Impulse);
+        }
+            
     }
-
+    private void StopVelocity()
+    {
+        playerRigidbody.velocity = Vector3.zero;
+    }
+    bool IsSideClear(Vector3 direction, float range)
+    {
+        Vector3 highestPosition = new(transform.position.x,transform.position.y+range, transform.position.z);
+        Vector3 mediumPosition = transform.position;
+        Vector3 shortestPosition = new(transform.position.x, transform.position.y - range, transform.position.z);
+        return !IsObstacle(new Vector3[] { highestPosition, mediumPosition, shortestPosition }, direction);
+    }
+    bool IsObstacle(Vector3[] origins, Vector3 moveDirection)
+    {
+        foreach (Vector3 origin in origins)
+        {
+            Ray ray = new Ray(origin, moveDirection);
+            float maxDistance = colliderCheckerRay;
+            Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.blue);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, maxDistance))
+            {
+                Debug.Log("Мне мишает " + hit.collider.name);
+                return true;
+            }
+        }
+        return false;
+    }
     void MovePlayer()
     {
         
-        float horizontal = !SDKLANG.IsMobileDevice ? Input.GetAxis("Horizontal"): joystick.Horizontal();
-        float vertical = !SDKLANG.IsMobileDevice ? Input.GetAxis("Vertical"): joystick.Vertical();
-
-        Vector3 moveDirection = new(horizontal, 0, vertical);
-        
-
-        if (!moveDirection.Equals(new Vector3(0, 0, 0)))
-        {
-            Vector3 moveLocalDirection = transform.TransformDirection(moveDirection);
-            Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
-            cameraPosition.y += cameraHeight;
-            // Проверка отсутсвия блоков перед двумя точками, перед камерой и перед серединой тела
-            //if (!IsObstacle(meshPoints, moveLocalDirection) && !IsObstacle(cameraPosition, moveLocalDirection))
-            if (!IsObstacle(meshPoints, moveLocalDirection))
+        float horizontal = !SDKLANG.IsMobileDevice ? Input.GetAxis("Horizontal") : joystick.Horizontal();
+        float vertical = !SDKLANG.IsMobileDevice ? Input.GetAxis("Vertical") : joystick.Vertical();
+            if (vertical > 0)
             {
-                transform.Translate(moveDirection * movementSpeed * Time.deltaTime);
+                if (IsSideClear(transform.forward, rangeBColiderCheckers))
+                {
+                    Vector3 moveSide = new(0, 0, vertical);
+                    transform.Translate(moveSide * movementSpeed * Time.deltaTime);
+                }
             }
-        }
-            
+            if (vertical < 0)
+            {
+                if (IsSideClear(-transform.forward, rangeBColiderCheckers))
+                {
+                    Vector3 moveSide = new(0, 0, vertical);
+                    transform.Translate(moveSide * movementSpeed * Time.deltaTime);
+                }
+            }
+            if (horizontal > 0)
+            {
+                if (IsSideClear(transform.right, rangeBColiderCheckers))
+                {
+                    Vector3 moveSide = new(horizontal, 0, 0);
+                    transform.Translate(moveSide * movementSpeed * Time.deltaTime);
+                }
+            }
+            if (horizontal < 0)
+            {
+                if (IsSideClear(-transform.right, rangeBColiderCheckers))
+                {
+                    Vector3 moveSide = new(horizontal, 0, 0);
+                    transform.Translate(moveSide * movementSpeed * Time.deltaTime);
+                }
+            }
+
+        //transform.position += velocity * Time.deltaTime;
+
+
+
     }
     //Проверка на отсутствии объекта в сторону перемещения
     bool IsObstacle(Vector3 orgin,Vector3 moveDirection)
@@ -144,26 +213,9 @@ public class PlayerController : MonoBehaviour
         // В противном случае, возвращаем false
         return false;
     }
-    bool IsObstacle(GameObject[] origins, Vector3 moveDirection)
-    {
-        foreach(GameObject origin in origins)
-        {
-            Vector3 origin2 = origin.transform.position;
-            Ray ray = new Ray(origin2, moveDirection);
-            float maxDistance = colliderCheckerRay;
-            Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.blue);
-            RaycastHit hit;
-            if (Physics.Raycast(ray,out hit,maxDistance))
-            {
-                if(hit.collider.gameObject.tag != "Player")
-                    return true;
-            }
-        }
-        return false;
-    }
     void RotatePlayer()
     {
-        float mouseX = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse X")*mouseSensivity : sensorXaxis;
+        float mouseX = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse X")*mouseSensivity : -sensorXaxis;
         if (!mouseX.Equals(new Vector3(0, 0, 0)))
         {
             Vector3 playerRotation = new(0, mouseX * rotationSpeed *Time.deltaTime, 0);
@@ -175,7 +227,7 @@ public class PlayerController : MonoBehaviour
 
     void RotateCamera()
     {
-        float mouseY = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse Y")*mouseSensivity : sensorYaxis;
+        float mouseY = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse Y")*mouseSensivity : -sensorYaxis;
         //float mouseY = Input.GetAxis("Mouse Y");
         if(!mouseY.Equals(new Vector3(0, 0, 0)))
         {

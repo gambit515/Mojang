@@ -6,6 +6,7 @@ public class CameraChecker : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField] private float cameraDistance;
     [SerializeField] private GameObject MiningButton;
+    [SerializeField] private GameObject MiningImage;
     [SerializeField] private Animator pickaxeAnimation;
     [SerializeField] private float extractInterval;
     private GameObject oreFronOfYou;
@@ -19,7 +20,7 @@ public class CameraChecker : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.E))
+        if (Input.GetKeyUp(KeyCode.Mouse0))
             WannaExtract();
     }
     public void WannaExtract()
@@ -40,14 +41,18 @@ public class CameraChecker : MonoBehaviour
     private void OreChecker()
     {
         oreFronOfYou = GetGameObjectFromRay(transform.position, transform.forward, cameraDistance, new string[] {"Gold","Coal"} );
-        if (oreFronOfYou!=null && SDKLANG.IsMobileDevice)
+        if (oreFronOfYou!=null)
         {
-            MiningButton.SetActive(true);
+            if(SDKLANG.IsMobileDevice)
+                MiningButton.SetActive(true);
+            else
+                MiningImage.SetActive(true);
 
         }
         else
         {
             MiningButton.SetActive(false);
+            MiningImage.SetActive(false);
         }
             
     }
