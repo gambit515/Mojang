@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using EasyJoystick;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Threading;
 
 public class PlayerController : MonoBehaviour
 {
@@ -26,7 +27,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float mouseSensivity;
     //Высота камеры над основным телом объекта
     [SerializeField] private float cameraHeight = 1f;
-    [SerializeField] private GameObject[] meshPoints;
     [SerializeField] private RectTransform rightPieceOfScreen;
 
     [SerializeField] private float rangeBColiderCheckers;
@@ -39,7 +39,8 @@ public class PlayerController : MonoBehaviour
     private float sensorXaxis;
     private float sensorYaxis;
 
-    
+
+    private float currentRotation;
     private Camera playerCamera;
     private Rigidbody playerRigidbody;
 
@@ -51,6 +52,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        currentRotation = transform.rotation.y;
         //gravity = -(jumpHeight/6) / Mathf.Pow(timeToJumpApex, 2);
         //jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
 
@@ -70,6 +72,8 @@ public class PlayerController : MonoBehaviour
         IsOnGround();
         HandleTouches();
         MovePlayer();
+        RotatePlayer();
+        RotateCamera();
         if (Input.GetKeyDown(KeyCode.Space))
         {
             WannaJump();
@@ -77,8 +81,7 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        RotatePlayer();
-        RotateCamera();
+        
         CameraUpdate();
     }
     private void CameraUpdate()
@@ -106,18 +109,13 @@ public class PlayerController : MonoBehaviour
     //Функция которая вызывает прыжок
     public void WannaJump()
     {
-        //Debug.Log("transform"+transform.position);
         Vector3 cameraPosition = transform.position; //Точка указывающая текущее положение камеры
         cameraPosition.y += cameraHeight;
         if (isGrounded && !IsObstacle(cameraPosition, Vector3.up * jumpHeight))
         {
-            //playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            //Vector3 jumpVector = new(transform.position.x,transform.position.y+jumpHeight, transform.position.z);
             Vector3 jumpVector = new(0, jumpHeight,0);
             playerRigidbody.velocity = jumpVector;
             Invoke(nameof(StopVelocity), 0.2f);
-            //transform.position = jumpVector;
-            //playerRigidbody.AddForce(jumpVector,ForceMode.Impulse);
         }
             
     }
@@ -216,20 +214,36 @@ public class PlayerController : MonoBehaviour
     void RotatePlayer()
     {
         float mouseX = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse X")*mouseSensivity : -sensorXaxis;
-        if (!mouseX.Equals(new Vector3(0, 0, 0)))
+        if (!Mathf.Approximately(mouseX,0))
         {
-            Vector3 playerRotation = new(0, mouseX * rotationSpeed *Time.deltaTime, 0);
+            currentRotation += mouseX*rotationSpeed*Time.deltaTime;
+
+            //if(currentRotation > 0)
+            //{
+            //    if (currentRotation > 180)
+            //        currentRotation += -360;
+            //    transform.rotation=new Quaternion(0,0,0,currentRotation);
+            //}
+            //else
+            //{
+            //    if (currentRotation < -180)
+            //    {
+            //        currentRotation += 360;
+            //    }
+            //    transform.rotation = new Quaternion(0, 0, currentRotation, 0);
+            //}
+            //Vector3 playerRotation = new(0, mouseX * rotationSpeed *Time.deltaTime, 0);
 
             // Поворот игрока вокруг оси Y
-            playerRigidbody.MoveRotation(playerRigidbody.rotation * Quaternion.Euler(playerRotation));
+            //playerRigidbody.MoveRotation(playerRigidbody.rotation * Quaternion.Euler(playerRotation));
+            transform.rotation = Quaternion.Euler(0, currentRotation, 0);
         }
     }
 
     void RotateCamera()
     {
         float mouseY = !SDKLANG.IsMobileDevice ? Input.GetAxis("Mouse Y")*mouseSensivity : -sensorYaxis;
-        //float mouseY = Input.GetAxis("Mouse Y");
-        if(!mouseY.Equals(new Vector3(0, 0, 0)))
+        if(!Mathf.Approximately(mouseY, 0))
         {
             cameraRotationX -= mouseY * rotationSpeed * Time.deltaTime;
             cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f); // Ограничение вертикального угла обзора
