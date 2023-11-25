@@ -9,12 +9,15 @@ public class CameraChecker : MonoBehaviour
     [SerializeField] private GameObject MiningImage;
     [SerializeField] private Animator pickaxeAnimation;
     [SerializeField] private float extractInterval;
-    private GameObject oreFronOfYou;
+    [SerializeField] private float useInterval;
+    private GameObject oreFrontOfYou;
+    private GameObject leverFrontOfYou;
     private float lastExtractTime;
+    private float lastUseTime;
     void Start()
     {
         lastExtractTime = Time.time;
-        InvokeRepeating(nameof(OreChecker), 0.1f,0.25f);
+        InvokeRepeating(nameof(Checker), 0.1f,0.25f);
     }
 
     // Update is called once per frame
@@ -22,13 +25,23 @@ public class CameraChecker : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Mouse0))
             WannaExtract();
+        if (Input.GetKeyUp(KeyCode.E))
+            WannaUse();
     }
     public void WannaExtract()
     {
-        if (oreFronOfYou != null && Time.time - lastExtractTime > extractInterval)
+        if (oreFrontOfYou != null && Time.time - lastExtractTime > extractInterval)
         {
             lastExtractTime = Time.time;
-            Extract(oreFronOfYou);
+            Extract(oreFrontOfYou);
+        }
+    }
+    public void WannaUse()
+    {
+        if (leverFrontOfYou != null && Time.time - lastUseTime > useInterval)
+        {
+            lastUseTime = Time.time;
+            Use(leverFrontOfYou);
         }
     }
     private void Extract(GameObject block)
@@ -37,11 +50,14 @@ public class CameraChecker : MonoBehaviour
         block.GetComponent<BlockLogic>().RegisterHit();
 
     }
-    
-    private void OreChecker()
+    private void Use(GameObject block)
     {
-        oreFronOfYou = GetGameObjectFromRay(transform.position, transform.forward, cameraDistance, new string[] {"Gold","Coal"} );
-        if (oreFronOfYou!=null)
+        block.GetComponent<Lever>().Switch();
+    }
+    private void Checker()
+    {
+        oreFrontOfYou = GetGameObjectFromRay(transform.position, transform.forward, cameraDistance, new string[] {"Gold","Coal"} );
+        if (oreFrontOfYou!=null)
         {
             if(SDKLANG.IsMobileDevice)
                 MiningButton.SetActive(true);
@@ -54,7 +70,11 @@ public class CameraChecker : MonoBehaviour
             MiningButton.SetActive(false);
             MiningImage.SetActive(false);
         }
-            
+        leverFrontOfYou = GetGameObjectFromRay(transform.position, transform.forward, cameraDistance, new string[] { "Lever" });
+        if(leverFrontOfYou != null)
+        {
+            Debug.Log("LEVER");
+        }
     }
     GameObject GetGameObjectFromRay(Vector3 orgin, Vector3 moveDirection, float maxDistance,string tag)
     {
