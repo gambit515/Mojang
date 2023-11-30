@@ -5,6 +5,7 @@ using UnityEngine;
 public class BlockLogic : MonoBehaviour
 {
     [SerializeField] private float time_delay;
+    [SerializeField] private float anim_delay;
     [SerializeField] private AudioClip hitSound;
     private int hits;
     private void Start()
@@ -14,12 +15,16 @@ public class BlockLogic : MonoBehaviour
     }
     public void RegisterHit()
     {
+        Invoke(nameof(HitAnim), anim_delay);
         Invoke(nameof(GetHit), time_delay);
+    }
+    private void HitAnim()
+    {
+        AudioSource.PlayClipAtPoint(hitSound, transform.position);
     }
     private void GetHit()
     {
         hits++;
-        AudioSource.PlayClipAtPoint(hitSound, transform.position);
         switch (hits)
         {
             case 1:

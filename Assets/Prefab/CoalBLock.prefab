@@ -19,7 +19,7 @@ GameObject:
   m_TagString: Coal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5612975718873414995
 Transform:
@@ -141,4 +141,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   time_delay: 1
+  anim_delay: 0.25
   hitSound: {fileID: 8300000, guid: 55c09c2de144d1d47b01e1c56ecc2dd0, type: 3}

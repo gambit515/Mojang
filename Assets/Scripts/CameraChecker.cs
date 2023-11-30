@@ -7,9 +7,12 @@ public class CameraChecker : MonoBehaviour
     [SerializeField] private float cameraDistance;
     [SerializeField] private GameObject MiningButton;
     [SerializeField] private GameObject MiningImage;
+    [SerializeField] private GameObject UseButton;
+    [SerializeField] private GameObject UseImage;
     [SerializeField] private Animator pickaxeAnimation;
     [SerializeField] private float extractInterval;
     [SerializeField] private float useInterval;
+    [SerializeField] private PicaxeScript picaxe;
     private GameObject oreFrontOfYou;
     private GameObject leverFrontOfYou;
     private float lastExtractTime;
@@ -47,6 +50,7 @@ public class CameraChecker : MonoBehaviour
     private void Extract(GameObject block)
     {
         pickaxeAnimation.SetTrigger("Extract");
+        //picaxe.MoveCameraToPoint(block.transform.position);
         block.GetComponent<BlockLogic>().RegisterHit();
 
     }
@@ -73,7 +77,15 @@ public class CameraChecker : MonoBehaviour
         leverFrontOfYou = GetGameObjectFromRay(transform.position, transform.forward, cameraDistance, new string[] { "Lever" });
         if(leverFrontOfYou != null)
         {
-            Debug.Log("LEVER");
+            if (SDKLANG.IsMobileDevice)
+                UseButton.SetActive(true);
+            else
+                UseImage.SetActive(true);
+        }
+        else
+        {
+            UseButton.SetActive(false);
+            UseImage.SetActive(false);
         }
     }
     GameObject GetGameObjectFromRay(Vector3 orgin, Vector3 moveDirection, float maxDistance,string tag)

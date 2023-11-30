@@ -18,7 +18,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &6068310910812915156
 Transform:
@@ -121,3 +121,4 @@ MonoBehaviour:
   StartVector: {x: -25.5, y: 16.61475, z: -79.5}
   FinishVector: {x: -25.5, y: 16.61474, z: -103.5}
   duration: 30
+  automaticallyPlatfrom: 0

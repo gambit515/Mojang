@@ -11,49 +11,93 @@ public class MovingPlatform : MonoBehaviour
     private Vector3 speed = new();
     [SerializeField] private float duration;
     private List<GameObject> onPlatform = new() { };
+    [SerializeField] private bool automaticallyPlatfrom;
+    private AudioSource audioSource;
 
+
+    private bool goToFinish;
+    private bool goToStart;
 
     private bool IsFirstXBigger;
     private bool IsFirstYBigger;
     private bool IsFirstZBigger;
+    private void Awake()
+    {
+        transform.position = StartVector;
+    }
 
     // Update is called once per frame
     private void Start()
     {
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.clip = Resources.Load<AudioClip>("Audio/Machine");
+
+        goToFinish = false;
+        goToStart= false;
+
         IsFirstXBigger = StartVector.x > FinishVector.x;
         IsFirstYBigger = StartVector.y > FinishVector.y;
         IsFirstZBigger = StartVector.z > FinishVector.z;
-
-
-        /*speed.x = (Math.Abs(StartVector.x) - Math.Abs(FinishVector.x)) / duration;
-        speed.y = (Math.Abs(StartVector.y) - Math.Abs(FinishVector.y)) / duration;
-        speed.z = (Math.Abs(StartVector.z) - Math.Abs(FinishVector.z)) / duration;*/
 
         speed.x = (StartVector.x - FinishVector.x) / duration;
         speed.y = (StartVector.y - FinishVector.y) / duration;
         speed.z = (StartVector.z - FinishVector.z) / duration;
     }
+    public void GoToFinish()
+    {
+        goToFinish= true;
+        goToStart= false;
+        audioSource.Play();
+    }
+    public void GoToStart()
+    {
+        goToStart= true;
+        goToFinish = false;
+        audioSource.Play();
+    }
     void Update()
     {
-        /*float t = Mathf.Clamp01(elapsedTime / duration);
-        if (t >= 1f)
+        if(automaticallyPlatfrom)
         {
-            isFinish = !isFinish;
-            elapsedTime = 0f;
-        }*/
+            if (!isFinish)
+            {
+                TransformVector(-speed);
+            }
+            else
+            {
+                TransformVector(speed);
+            }
 
-
-        if (!isFinish)
-        {
-            TransformVector(-speed);
+            if (PathIsComplete(isFinish,FinishVector,StartVector))
+                isFinish = !isFinish;
         }
         else
         {
-            TransformVector(speed);
+            if (goToStart)
+            {
+                TransformVector(speed);
+                if (PathIsComplete(goToStart, FinishVector, StartVector))
+                {
+                    goToStart = false;
+                    transform.position = StartVector;
+                    audioSource.Stop();
+                }
+                    
+            }
+            if(goToFinish)
+            {
+                TransformVector(-speed);
+                if (PathIsComplete(!goToFinish, FinishVector,StartVector ))
+                {
+                    goToFinish = false;
+                    transform.position = FinishVector;
+                    audioSource.Stop();
+                }
+            }
         }
+        
 
-        if (PathIsComplete())
-            isFinish = !isFinish;
+        
         //lapsedTime += Time.deltaTime;
 
     }
@@ -65,7 +109,7 @@ public class MovingPlatform : MonoBehaviour
             return true;
         return false;
     }
-    private bool PathIsComplete()
+    private bool PathIsComplete(bool isFinish, Vector3 FinishVector, Vector3 StartVector)
     {
         if(!isFinish)
         {
